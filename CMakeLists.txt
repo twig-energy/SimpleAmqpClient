@@ -1,39 +1,45 @@
-# Most widely used distributions have cmake 3.5 or greater available as of March
-# 2019.  A notable exception is RHEL-7 (CentOS7).  You can install a current
-# version of CMake by first installing Extra Packages for Enterprise Linux
-# (https://fedoraproject.org/wiki/EPEL#Extra_Packages_for_Enterprise_Linux_.28EPEL.29)
-# and then issuing `yum install cmake3` on the command line.
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.14)
 
-project(SimpleAmqpClient LANGUAGES CXX)
+include(cmake/prelude.cmake)
 
-set(CMAKE_CXX_STANDARD 98)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+project(
+    SimpleAmqpClient
+    VERSION 2.5.1
+    DESCRIPTION "Short description"
+    HOMEPAGE_URL "https://github.com/twig-energy/SimpleAmqpClient"
+    LANGUAGES CXX
+)
 
-# Follow all steps below in order to calculate new ABI version when updating the library
-# NOTE: THIS IS UNRELATED to the actual project version
-#
-# 1. If the library source code has changed at all since the last update, then increment revision
-# 2. If any interfaces have been added, removed, or changed since the last update, increment
-#    current and set revision to 0.
-# 3. If any interfaces have been added since the last public release, then increment age.
-# 4. If any interfaces have been removed since the last public release, then set age to 0.
+include(cmake/project-is-top-level.cmake)
+include(cmake/variables.cmake)
 
-set(SAC_SOVERSION_CURRENT   7)
-set(SAC_SOVERSION_REVISION  1)
-set(SAC_SOVERSION_AGE       0)
+find_package(rabbitmq-c CONFIG REQUIRED)
+find_package(Boost REQUIRED chrono system)
 
-math(EXPR SAC_SOVERSION_MAJOR "${SAC_SOVERSION_CURRENT} - ${SAC_SOVERSION_AGE}")
-math(EXPR SAC_SOVERSION_MINOR "${SAC_SOVERSION_AGE}")
-math(EXPR SAC_SOVERSION_PATCH "${SAC_SOVERSION_REVISION}")
+# ---- Declare library ----
 
-set(SAC_VERSION ${SAC_SOVERSION_MAJOR}.${SAC_SOVERSION_MINOR}.${SAC_SOVERSION_PATCH})
-set(SAC_SOVERSION ${SAC_SOVERSION_MAJOR})
+add_library(
+    SimpleAmqpClient_SimpleAmqpClient
+    source/AmqpException.cpp
+    source/AmqpLibraryException.cpp
+    source/AmqpResponseLibraryException.cpp
+    source/BasicMessage.cpp
+    source/Channel.cpp
+    source/ChannelImpl.cpp
+    source/Envelope.cpp
+    source/MessageReturnedException.cpp
+    source/Table.cpp
+    source/TableImpl.cpp
+)
+add_library(SimpleAmqpClient::SimpleAmqpClient ALIAS SimpleAmqpClient_SimpleAmqpClient)
 
-file(STRINGS src/SimpleAmqpClient/Version.h _API_VERSION_MAJOR REGEX "^#define SIMPLEAMQPCLIENT_VERSION_MAJOR [0-9]+$")
-file(STRINGS src/SimpleAmqpClient/Version.h _API_VERSION_MINOR REGEX "^#define SIMPLEAMQPCLIENT_VERSION_MINOR [0-9]+$")
-file(STRINGS src/SimpleAmqpClient/Version.h _API_VERSION_PATCH REGEX "^#define SIMPLEAMQPCLIENT_VERSION_PATCH [0-9]+$")
+include(GenerateExportHeader)
+generate_export_header(
+    SimpleAmqpClient_SimpleAmqpClient
+    BASE_NAME SimpleAmqpClient
+    EXPORT_FILE_NAME export/SimpleAmqpClient/SimpleAmqpClient_export.hpp
+    CUSTOM_CONTENT_FROM_VARIABLE pragma_suppress_c4251
+)
 
 string(REGEX MATCH "[0-9]+" _API_VERSION_MAJOR ${_API_VERSION_MAJOR})
 string(REGEX MATCH "[0-9]+" _API_VERSION_MINOR ${_API_VERSION_MINOR})
@@ -61,9 +67,15 @@ else()
 endif()
 set(Boost_USE_STATIC_RUNTIME OFF)
 
-find_package(Boost 1.47.0 COMPONENTS chrono system REQUIRED)
-include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
-link_directories(${Boost_LIBRARY_DIRS})
+set_target_properties(
+    SimpleAmqpClient_SimpleAmqpClient PROPERTIES
+    CXX_VISIBILITY_PRESET hidden
+    VISIBILITY_INLINES_HIDDEN YES
+    VERSION "${PROJECT_VERSION}"
+    SOVERSION "${PROJECT_VERSION_MAJOR}"
+    EXPORT_NAME SimpleAmqpClient
+    OUTPUT_NAME SimpleAmqpClient
+)
 
 # Try using the CMake config modules first
 find_package(rabbitmq-c CONFIG QUIET)
@@ -80,17 +92,23 @@ else()
     INCLUDE_DIRECTORIES(SYSTEM ${Rabbitmqc_INCLUDE_DIRS})
 endif()
 
-option(ENABLE_SSL_SUPPORT "Enable SSL support." ${Rabbitmqc_SSL_ENABLED})
+target_include_directories(
+    SimpleAmqpClient_SimpleAmqpClient SYSTEM
+    PUBLIC
+    "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/export>"
+)
 
-if (ENABLE_SSL_SUPPORT)
-  add_definitions(-DSAC_SSL_SUPPORT_ENABLED)
+target_compile_features(SimpleAmqpClient_SimpleAmqpClient PUBLIC cxx_std_17)
+
+target_link_libraries(SimpleAmqpClient_SimpleAmqpClient PUBLIC rabbitmq::rabbitmq-static Boost::boost Boost::chrono Boost::system)
+
+# ---- Install rules ----
+
+if(NOT CMAKE_SKIP_INSTALL_RULES)
+  include(cmake/install-rules.cmake)
 endif()
 
-if (CMAKE_GENERATOR MATCHES ".*(Make|Ninja).*"
-    AND NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel" FORCE)
-  message(STATUS "CMAKE_BUILD_TYPE not specified. Using ${CMAKE_BUILD_TYPE} build")
-endif ()
+# ---- Developer mode ----
 
 if (CMAKE_CXX_FLAGS STREQUAL ""
     AND NOT DEFINED SAC_CXX_FLAGS_SET)
