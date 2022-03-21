@@ -3,43 +3,48 @@ cmake_minimum_required(VERSION 3.14)
 include(cmake/prelude.cmake)
 
 project(
-    SimpleAmqpClient
-    VERSION 2.5.1
-    DESCRIPTION "Short description"
-    HOMEPAGE_URL "https://github.com/twig-energy/SimpleAmqpClient"
-    LANGUAGES CXX
-)
+  SimpleAmqpClient
+  VERSION 2.5.1
+  DESCRIPTION "Short description"
+  HOMEPAGE_URL "https://github.com/twig-energy/SimpleAmqpClient"
+  LANGUAGES CXX)
 
 include(cmake/project-is-top-level.cmake)
 include(cmake/variables.cmake)
 
 find_package(rabbitmq-c CONFIG REQUIRED)
 find_package(Boost REQUIRED chrono system)
+find_path(BOOST_VARIANT_INCLUDE_DIRS "boost/variant.hpp")
+find_path(BOOST_ALGORITHM_INCLUDE_DIRS "boost/algorithm")
+find_path(BOOST_FOREACH_INCLUDE_DIRS "boost/foreach.hpp")
+find_path(RABBITMQC_INCLUDE_DIRS "amqp.h")
 
 # ---- Declare library ----
 
 add_library(
-    SimpleAmqpClient_SimpleAmqpClient
-    source/AmqpException.cpp
-    source/AmqpLibraryException.cpp
-    source/AmqpResponseLibraryException.cpp
-    source/BasicMessage.cpp
-    source/Channel.cpp
-    source/ChannelImpl.cpp
-    source/Envelope.cpp
-    source/MessageReturnedException.cpp
-    source/Table.cpp
-    source/TableImpl.cpp
-)
-add_library(SimpleAmqpClient::SimpleAmqpClient ALIAS SimpleAmqpClient_SimpleAmqpClient)
+  SimpleAmqpClient_SimpleAmqpClient
+  source/AmqpException.cpp
+  source/AmqpLibraryException.cpp
+  source/AmqpResponseLibraryException.cpp
+  source/BasicMessage.cpp
+  source/Channel.cpp
+  source/ChannelImpl.cpp
+  source/Envelope.cpp
+  source/MessageReturnedException.cpp
+  source/Table.cpp
+  source/TableImpl.cpp)
+add_library(SimpleAmqpClient::SimpleAmqpClient ALIAS
+            SimpleAmqpClient_SimpleAmqpClient)
 
 include(GenerateExportHeader)
 generate_export_header(
-    SimpleAmqpClient_SimpleAmqpClient
-    BASE_NAME SimpleAmqpClient
-    EXPORT_FILE_NAME export/SimpleAmqpClient/SimpleAmqpClient_export.hpp
-    CUSTOM_CONTENT_FROM_VARIABLE pragma_suppress_c4251
-)
+  SimpleAmqpClient_SimpleAmqpClient
+  BASE_NAME
+  SimpleAmqpClient
+  EXPORT_FILE_NAME
+  export/SimpleAmqpClient/SimpleAmqpClient_export.hpp
+  CUSTOM_CONTENT_FROM_VARIABLE
+  pragma_suppress_c4251)
 
 if(NOT BUILD_SHARED_LIBS)
   target_compile_definitions(SimpleAmqpClient_SimpleAmqpClient PUBLIC SIMPLEAMQPCLIENT_STATIC_DEFINE)
@@ -59,18 +64,25 @@ target_include_directories(
     SimpleAmqpClient_SimpleAmqpClient ${warning_guard}
     PUBLIC
     "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>"
-    "$<BUILD_INTERFACE:${PACKAGE_PREFIX_DIR}/include>"
+    "$<BUILD_INTERFACE:${BOOST_VARIANT_INCLUDE_DIRS}>"
+    "$<BUILD_INTERFACE:${BOOST_ALGORITHM_INCLUDE_DIRS}>"
+    "$<BUILD_INTERFACE:${BOOST_FOREACH_INCLUDE_DIRS}>"
+    "$<BUILD_INTERFACE:${RABBITMQC_INCLUDE_DIRS}>"
 )
 
 target_include_directories(
-    SimpleAmqpClient_SimpleAmqpClient SYSTEM
-    PUBLIC
-    "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/export>"
-)
+  SimpleAmqpClient_SimpleAmqpClient SYSTEM
+  PUBLIC "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/export>"
+         "$<BUILD_INTERFACE:${BOOST_VARIANT_INCLUDE_DIRS}>"
+         "$<BUILD_INTERFACE:${BOOST_ALGORITHM_INCLUDE_DIRS}>"
+         "$<BUILD_INTERFACE:${BOOST_FOREACH_INCLUDE_DIRS}>"
+         "$<BUILD_INTERFACE:${RABBITMQC_INCLUDE_DIRS}>")
 
 target_compile_features(SimpleAmqpClient_SimpleAmqpClient PUBLIC cxx_std_17)
 
-target_link_libraries(SimpleAmqpClient_SimpleAmqpClient PUBLIC rabbitmq::rabbitmq-static Boost::boost Boost::chrono Boost::system)
+target_link_libraries(
+  SimpleAmqpClient_SimpleAmqpClient
+  PUBLIC rabbitmq::rabbitmq-static Boost::boost Boost::chrono Boost::system)
 
 # ---- Install rules ----
 
