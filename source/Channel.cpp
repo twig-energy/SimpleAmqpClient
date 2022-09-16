@@ -831,48 +831,6 @@ void Channel::BasicPublish(const std::string &exchange_name,
       StringToBytes(routing_key), mandatory, immediate, &properties,
       StringToBytes(message->Body())));
 
-  // If we've done things correctly we can get one of 4 things back from the
-  // broker
-  // - basic.ack - our channel is in confirm mode, messsage was 'dealt with' by
-  // the broker
-  // - basic.nack - our channel is in confirm mode, queue has max-length set and
-  // is full, queue overflow stratege is reject-publish
-  // - basic.return then basic.ack - the message wasn't delievered, but was
-  // dealt with
-  // - channel.close - probably tried to publish to a non-existant exchange, in
-  // any case error!
-  // - connection.clsoe - something really bad happened
-  const boost::array<boost::uint32_t, 3> PUBLISH_ACK = {
-      {AMQP_BASIC_ACK_METHOD, AMQP_BASIC_RETURN_METHOD,
-       AMQP_BASIC_NACK_METHOD}};
-  amqp_frame_t response;
-  boost::array<amqp_channel_t, 1> channels = {{channel}};
-  m_impl->GetMethodOnChannel(channels, response, PUBLISH_ACK);
-
-  if (AMQP_BASIC_NACK_METHOD == response.payload.method.id) {
-    amqp_basic_nack_t *return_method =
-        reinterpret_cast<amqp_basic_nack_t *>(response.payload.method.decoded);
-    MessageRejectedException message_rejected(return_method->delivery_tag);
-    m_impl->ReturnChannel(channel);
-    m_impl->MaybeReleaseBuffersOnChannel(channel);
-    throw message_rejected;
-  }
-
-  if (AMQP_BASIC_RETURN_METHOD == response.payload.method.id) {
-    MessageReturnedException message_returned =
-        m_impl->CreateMessageReturnedException(
-            *(reinterpret_cast<amqp_basic_return_t *>(
-                response.payload.method.decoded)),
-            channel);
-
-    const boost::array<boost::uint32_t, 1> BASIC_ACK = {
-        {AMQP_BASIC_ACK_METHOD}};
-    m_impl->GetMethodOnChannel(channels, response, BASIC_ACK);
-    m_impl->ReturnChannel(channel);
-    m_impl->MaybeReleaseBuffersOnChannel(channel);
-    throw message_returned;
-  }
-
   m_impl->ReturnChannel(channel);
   m_impl->MaybeReleaseBuffersOnChannel(channel);
 }
