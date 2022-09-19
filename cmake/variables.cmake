@@ -41,7 +41,7 @@ if(NOT PROJECT_IS_TOP_LEVEL)
 endif()
 
 
-option(SIMPLEAMQPCLIENT_ENABLE_PUBLISH_CONFIRM "enable publisher confirms mode" ON)
+option(SIMPLEAMQPCLIENT_ENABLE_PUBLISH_CONFIRM "enable publisher confirms mode" OFF)
 if (${SIMPLEAMQPCLIENT_ENABLE_PUBLISH_CONFIRM})
   add_compile_definitions(SIMPLEAMQPCLIENT_ENABLE_PUBLISH_CONFIRM=1)
 endif ()
