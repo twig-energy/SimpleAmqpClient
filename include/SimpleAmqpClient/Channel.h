@@ -108,7 +108,7 @@ class SIMPLEAMQPCLIENT_EXPORT Channel : boost::noncopyable {
     std::string vhost;  ///< Virtualhost on the broker. Default '/', required.
     int port;           ///< Port to connect to, default is 5672.
     int frame_max;      ///< Max frame size in bytes. Default 128KB.
-    bool is_publisher_confirms = false; ///< Whether or not the channel is created in publisher confirms mode.
+    bool is_publisher_confirms = true; ///< Whether or not the channel is created in publisher confirms mode.
     /// One of BasicAuth or ExternalSaslAuth is required.
     boost::variant<BasicAuth, ExternalSaslAuth> auth;
     /// Connect using TLS/SSL when set, otherwise use an unencrypted channel.
