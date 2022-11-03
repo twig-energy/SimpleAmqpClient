@@ -435,7 +435,7 @@ Channel::ChannelImpl* Channel::OpenChannel(const std::string& host,
     }
     impl->CheckForError(sock);
 
-    impl->DoLogin(username, password, vhost, frame_max, sasl_external);
+    impl->DoLogin(username, password, vhost, frame_max, hearbeat_timeout_seconds, sasl_external);
   } catch (...) {
     amqp_destroy_connection(impl->m_connection);
     delete impl;
@@ -508,7 +508,7 @@ Channel::ChannelImpl* Channel::OpenSecureChannel(
           status, "Error setting client certificate for socket");
     }
 
-    impl->DoLogin(username, password, vhost, frame_max, sasl_external);
+    impl->DoLogin(username, password, vhost, frame_max, hearbeat_timeout_seconds, sasl_external);
   } catch (...) {
     amqp_destroy_connection(impl->m_connection);
     delete impl;
