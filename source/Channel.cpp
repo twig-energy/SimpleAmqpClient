@@ -413,7 +413,7 @@ Channel::ChannelImpl* Channel::OpenChannel(const std::string& host,
                                            bool sasl_external,
                                            bool is_publisher_confirms,
                                            int socket_open_timeout_seconds,
-                                           int hearbeat_timeout_seconds)
+                                           int heartbeat_timeout_seconds)
 {
   ChannelImpl *impl = new ChannelImpl;
   impl->is_publisher_confirms = is_publisher_confirms;
@@ -435,7 +435,8 @@ Channel::ChannelImpl* Channel::OpenChannel(const std::string& host,
     }
     impl->CheckForError(sock);
 
-    impl->DoLogin(username, password, vhost, frame_max, hearbeat_timeout_seconds, sasl_external);
+    impl->DoLogin(username, password, vhost, frame_max,
+                  heartbeat_timeout_seconds, sasl_external);
   } catch (...) {
     amqp_destroy_connection(impl->m_connection);
     delete impl;

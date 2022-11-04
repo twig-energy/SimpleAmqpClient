@@ -109,7 +109,7 @@ class SIMPLEAMQPCLIENT_EXPORT Channel : boost::noncopyable {
     int port;           ///< Port to connect to, default is 5672.
     int frame_max;      ///< Max frame size in bytes. Default 128KB.
     bool is_publisher_confirms = true; ///< Whether or not the channel is created in publisher confirms mode.
-    int socket_open_timeout_seconds = 0; //< 0 means never time out
+    int socket_open_timeout_seconds = 0; //< less than or equal to 0 means never time out
     int heartbeat_timeout_seconds = 0;  //< 0 means disable heartbeats
     /// One of BasicAuth or ExternalSaslAuth is required.
     boost::variant<BasicAuth, ExternalSaslAuth> auth;
@@ -932,7 +932,7 @@ class SIMPLEAMQPCLIENT_EXPORT Channel : boost::noncopyable {
                                    bool sasl_external,
                                    bool is_publisher_confirms,
                                    int socket_open_timeout_seconds,
-                                   int hearbeat_timeout_seconds);
+                                   int heartbeat_timeout_seconds);
 
    static ChannelImpl* OpenSecureChannel(const std::string& host,
                                          int port,
