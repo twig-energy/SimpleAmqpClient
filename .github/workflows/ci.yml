@@ -46,4 +46,6 @@ jobs:
 
     - name: Test
       working-directory: build
+      env:
+        AMQP_BROKER: "localhost"
       run: ctest --output-on-failure -C Release -j 2
