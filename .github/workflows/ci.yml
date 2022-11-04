@@ -15,6 +15,11 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    services:
+      rabbitmq:
+        image: rabbitmq:3
+        ports:
+          - 5672:5672
     steps:
     - uses: actions/checkout@v2
 
@@ -41,4 +46,6 @@ jobs:
 
     - name: Test
       working-directory: build
+      env:
+        AMQP_BROKER: "localhost"
       run: ctest --output-on-failure -C Release -j 2
