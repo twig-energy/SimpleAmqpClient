@@ -53,6 +53,11 @@ class SIMPLEAMQPCLIENT_EXPORT AmqpLibraryException : public std::runtime_error {
   /**
    * Factory-construct with an error code
    */
+  static AmqpLibraryException CreateException(int error_code, int internal_error_code);
+
+  /**
+   * Factory-construct with an error code
+   */
   static AmqpLibraryException CreateException(int error_code);
   /**
    * Factory-construct with an error code and a string context

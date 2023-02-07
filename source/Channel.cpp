@@ -484,7 +484,7 @@ Channel::ChannelImpl* Channel::OpenSecureChannel(
         amqp_ssl_socket_set_cacert(socket, tls_params.ca_cert_path.c_str());
     if (status) {
       throw AmqpLibraryException::CreateException(
-          status, "Error setting CA certificate for socket");
+          status, socket->internal_error, "Error setting CA certificate for socket");
     }
 
     if (tls_params.client_key_path != "" && tls_params.client_cert_path != "") {
@@ -493,7 +493,7 @@ Channel::ChannelImpl* Channel::OpenSecureChannel(
                                   tls_params.client_key_path.c_str());
       if (status) {
         throw AmqpLibraryException::CreateException(
-            status, "Error setting client certificate for socket");
+            status, socket->internal_error, "Error setting client certificate for socket");
       }
     }
 
@@ -506,7 +506,7 @@ Channel::ChannelImpl* Channel::OpenSecureChannel(
 
     if (status) {
       throw AmqpLibraryException::CreateException(
-          status, "Error setting client certificate for socket");
+          status, socket->internal_error, "Error setting client certificate for socket");
     }
 
     impl->DoLogin(username, password, vhost, frame_max, hearbeat_timeout_seconds, sasl_external);

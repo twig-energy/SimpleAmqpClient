@@ -34,6 +34,16 @@
 
 namespace AmqpClient {
 
+static AmqpLibraryException AmqpLibraryException::CreateException(
+    int error_code, int internal_error_code)
+{
+  std::string message(amqp_error_string2(error_code));
+  message.append("internal_error_code: ");
+  message.append(internal_error_code);
+
+  return AmqpLibraryException(message, error_code);
+}
+
 AmqpLibraryException AmqpLibraryException::CreateException(int error_code) {
   std::string message(amqp_error_string2(error_code));
 
