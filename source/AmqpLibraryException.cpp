@@ -39,7 +39,7 @@ static AmqpLibraryException AmqpLibraryException::CreateException(
 {
   std::string message(amqp_error_string2(error_code));
   message.append("internal_error_code: ");
-  message.append(internal_error_code);
+  message.append(std::to_string(internal_error_code));
 
   return AmqpLibraryException(message, error_code);
 }
