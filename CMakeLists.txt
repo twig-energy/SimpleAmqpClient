@@ -17,7 +17,6 @@ find_package(Boost REQUIRED chrono system)
 find_path(BOOST_VARIANT_INCLUDE_DIRS "boost/variant.hpp")
 find_path(BOOST_ALGORITHM_INCLUDE_DIRS "boost/algorithm")
 find_path(BOOST_FOREACH_INCLUDE_DIRS "boost/foreach.hpp")
-find_path(RABBITMQC_INCLUDE_DIRS "amqp.h")
 
 # ---- Declare library ----
 
@@ -63,18 +62,13 @@ set_target_properties(
 
 target_include_directories(
   SimpleAmqpClient_SimpleAmqpClient ${warning_guard}
-  PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>"
-         "$<BUILD_INTERFACE:${BOOST_VARIANT_INCLUDE_DIRS}>"
-         "$<BUILD_INTERFACE:${BOOST_ALGORITHM_INCLUDE_DIRS}>"
-         "$<BUILD_INTERFACE:${BOOST_FOREACH_INCLUDE_DIRS}>"
-         "$<BUILD_INTERFACE:${RABBITMQC_INCLUDE_DIRS}>")
+  PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
 
 target_include_directories(
-  SimpleAmqpClient_SimpleAmqpClient ${warning_guard} SYSTEM
+  SimpleAmqpClient_SimpleAmqpClient SYSTEM
   PUBLIC "$<BUILD_INTERFACE:${BOOST_VARIANT_INCLUDE_DIRS}>"
          "$<BUILD_INTERFACE:${BOOST_ALGORITHM_INCLUDE_DIRS}>"
-         "$<BUILD_INTERFACE:${BOOST_FOREACH_INCLUDE_DIRS}>"
-         "$<BUILD_INTERFACE:${RABBITMQC_INCLUDE_DIRS}>")
+         "$<BUILD_INTERFACE:${BOOST_FOREACH_INCLUDE_DIRS}>")
 
 target_compile_definitions(SimpleAmqpClient_SimpleAmqpClient
                            PUBLIC SAC_SSL_SUPPORT_ENABLED)

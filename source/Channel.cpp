@@ -27,11 +27,11 @@
  */
 
 // Put these first to avoid warnings about INT#_C macro redefinition
-#include <amqp.h>
-#include <amqp_framing.h>
-#include <amqp_tcp_socket.h>
+#include <rabbitmq-c/amqp.h>
+#include <rabbitmq-c/framing.h>
+#include <rabbitmq-c/tcp_socket.h>
 #ifdef SAC_SSL_SUPPORT_ENABLED
-#include <amqp_ssl_socket.h>
+#include <rabbitmq-c/ssl_socket.h>
 #endif
 
 #include <string.h>

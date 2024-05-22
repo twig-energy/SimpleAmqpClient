@@ -28,7 +28,7 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#include <amqp.h>
+#include <rabbitmq-c/amqp.h>
 
 #include <boost/cstdint.hpp>
 #include <boost/shared_ptr.hpp>

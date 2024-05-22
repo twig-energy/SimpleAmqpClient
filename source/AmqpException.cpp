@@ -28,8 +28,8 @@
 
 #include "SimpleAmqpClient/AmqpException.h"
 
-#include <amqp.h>
-#include <amqp_framing.h>
+#include <rabbitmq-c/amqp.h>
+#include <rabbitmq-c/framing.h>
 #include <assert.h>
 
 #include <boost/lexical_cast.hpp>
