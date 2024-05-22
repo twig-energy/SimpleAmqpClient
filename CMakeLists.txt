@@ -73,9 +73,6 @@ target_include_directories(
 target_compile_definitions(SimpleAmqpClient_SimpleAmqpClient
                            PUBLIC SAC_SSL_SUPPORT_ENABLED)
 
-target_compile_definitions(SimpleAmqpClient_SimpleAmqpClient
-                           PUBLIC SAC_SSL_SUPPORT_ENABLED)
-
 target_compile_features(SimpleAmqpClient_SimpleAmqpClient PUBLIC cxx_std_17)
 
 target_link_libraries(
