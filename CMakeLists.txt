@@ -96,3 +96,5 @@ elseif(NOT PROJECT_IS_TOP_LEVEL)
     AUTHOR_WARNING
       "Developer mode is intended for developers of SimpleAmqpClient")
 endif()
+
+include(cmake/dev-mode.cmake)
