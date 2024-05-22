@@ -29,7 +29,7 @@
 // Put these first to avoid warnings about INT#_C macro redefinition
 #include "SimpleAmqpClient/AmqpLibraryException.h"
 
-#include <amqp.h>
+#include <rabbitmq-c/amqp.h>
 #include <stdlib.h>
 
 namespace AmqpClient {

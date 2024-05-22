@@ -26,7 +26,7 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#include <amqp.h>
+#include <rabbitmq-c/amqp.h>
 
 #include <algorithm>
 #include <boost/array.hpp>

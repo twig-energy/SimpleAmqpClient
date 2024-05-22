@@ -32,7 +32,7 @@
 
 #include "SimpleAmqpClient/TableImpl.h"
 
-#include <amqp.h>
+#include <rabbitmq-c/amqp.h>
 #include <string.h>
 
 #include <algorithm>
