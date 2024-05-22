@@ -46,26 +46,9 @@ generate_export_header(
   CUSTOM_CONTENT_FROM_VARIABLE
   pragma_suppress_c4251)
 
-string(REGEX MATCH "[0-9]+" _API_VERSION_MAJOR ${_API_VERSION_MAJOR})
-string(REGEX MATCH "[0-9]+" _API_VERSION_MINOR ${_API_VERSION_MINOR})
-string(REGEX MATCH "[0-9]+" _API_VERSION_PATCH ${_API_VERSION_PATCH})
-
-set(SAC_APIVERSION
-    ${_API_VERSION_MAJOR}.${_API_VERSION_MINOR}.${_API_VERSION_PATCH})
-
-option(BUILD_SHARED_LIBS "Build SimpleAmqpClient as a shared library" ON)
-
-# Force the use of static boost library for static libraries
-include(CMakeDependentOption)
-
-cmake_dependent_option(
-  Boost_Dynamic_Linking_ENABLED "Enable boost dynamic linking" ON
-  "BUILD_SHARED_LIBS" OFF)
-
-if(Boost_Dynamic_Linking_ENABLED)
-  set(Boost_USE_STATIC_LIBS OFF)
-else()
-  set(Boost_USE_STATIC_LIBS ON)
+if(NOT BUILD_SHARED_LIBS)
+  target_compile_definitions(SimpleAmqpClient_SimpleAmqpClient
+                             PUBLIC SIMPLEAMQPCLIENT_STATIC_DEFINE)
 endif()
 set(Boost_USE_STATIC_RUNTIME OFF)
 
@@ -77,23 +60,20 @@ set_target_properties(
              SOVERSION "${PROJECT_VERSION_MAJOR}"
              EXPORT_NAME SimpleAmqpClient
              OUTPUT_NAME SimpleAmqpClient)
+
 target_include_directories(
   SimpleAmqpClient_SimpleAmqpClient ${warning_guard}
-  PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>"
-         "$<BUILD_INTERFACE:${BOOST_VARIANT_INCLUDE_DIRS}>"
-         "$<BUILD_INTERFACE:${BOOST_ALGORITHM_INCLUDE_DIRS}>"
-         "$<BUILD_INTERFACE:${BOOST_FOREACH_INCLUDE_DIRS}>"
-         "$<BUILD_INTERFACE:${RABBITMQC_INCLUDE_DIRS}>")
+  PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
 
 target_include_directories(
-  SimpleAmqpClient_SimpleAmqpClient SYSTEM
-  PUBLIC "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/export>"
-         "$<BUILD_INTERFACE:${BOOST_VARIANT_INCLUDE_DIRS}>"
+  SimpleAmqpClient_SimpleAmqpClient ${warning_guard} SYSTEM
+  PUBLIC "$<BUILD_INTERFACE:${BOOST_VARIANT_INCLUDE_DIRS}>"
          "$<BUILD_INTERFACE:${BOOST_ALGORITHM_INCLUDE_DIRS}>"
          "$<BUILD_INTERFACE:${BOOST_FOREACH_INCLUDE_DIRS}>"
          "$<BUILD_INTERFACE:${RABBITMQC_INCLUDE_DIRS}>")
 
-target_compile_definitions(SimpleAmqpClient_SimpleAmqpClient PUBLIC SAC_SSL_SUPPORT_ENABLED)
+target_compile_definitions(SimpleAmqpClient_SimpleAmqpClient
+                           PUBLIC SAC_SSL_SUPPORT_ENABLED)
 
 target_compile_features(SimpleAmqpClient_SimpleAmqpClient PUBLIC cxx_std_17)
 
@@ -109,15 +89,12 @@ endif()
 
 # ---- Developer mode ----
 
-if(CMAKE_CXX_FLAGS STREQUAL "" AND NOT DEFINED SAC_CXX_FLAGS_SET)
-  if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    set(CMAKE_CXX_FLAGS
-        "-Wall -Wextra"
-        CACHE STRING "Flags used by the compiler during all build types." FORCE)
-  endif()
-  set(SAC_CXX_FLAGS_SET
-      TRUE
-      CACHE INTERNAL "Have the SAC default compiler flags been set?")
+if(NOT SimpleAmqpClient_DEVELOPER_MODE)
+  return()
+elseif(NOT PROJECT_IS_TOP_LEVEL)
+  message(
+    AUTHOR_WARNING
+      "Developer mode is intended for developers of SimpleAmqpClient")
 endif()
 
 include_directories(BEFORE src ${CMAKE_CURRENT_BINARY_DIR})
@@ -254,72 +231,3 @@ install(
         src/SimpleAmqpClient/Util.h
         src/SimpleAmqpClient/Version.h
   DESTINATION include/SimpleAmqpClient)
-
-set(prefix ${CMAKE_INSTALL_PREFIX})
-set(exec_prefix "\${prefix}")
-set(libdir "\${prefix}/${CMAKE_INSTALL_LIBDIR}")
-set(includedir "\${prefix}/include")
-if(WIN32)
-  get_target_property(SIMPLEAMQPCLIENT_LIB SimpleAmqpClient OUTPUT_NAME)
-else(WIN32)
-  set(SIMPLEAMQPCLIENT_LIB SimpleAmqpClient)
-endif(WIN32)
-
-# Propagate package dependencies
-if(BUILD_SHARED_LIBS)
-  set(requires_private "librabbitmq")
-else(BUILD_SHARED_LIBS)
-  set(requires_public "librabbitmq")
-endif(BUILD_SHARED_LIBS)
-
-# Propagate interface compile definitions
-set(SIMPLEAMQPCLIENT_DEFINITIONS "")
-get_target_property(propagated_definitions SimpleAmqpClient
-                    INTERFACE_COMPILE_DEFINITIONS)
-if(propagated_definitions)
-  foreach(_def ${propagated_definitions})
-    set(SIMPLEAMQPCLIENT_DEFINITIONS
-        "${SIMPLEAMQPCLIENT_DEFINITIONS} -D${_def}")
-  endforeach()
-endif(propagated_definitions)
-
-# Propagate library dependencies
-set(libs_private "")
-set(libs_public "")
-
-if(BUILD_SHARED_LIBS)
-  set(populate_libs "libs_private")
-else(BUILD_SHARED_LIBS)
-  set(populate_libs "libs_public")
-  set(extra_win32_targets "${Rabbitmqc_LIBRARY};${SOCKET_LIBRARY}")
-endif(BUILD_SHARED_LIBS)
-
-foreach(_lib ${Boost_LIBRARIES} ${extra_win32_targets})
-
-  # Check if FindBoost.cmake provided actual library paths or targets
-  if(TARGET ${_lib})
-    get_target_property(_lib ${_lib} LOCATION)
-    message(WARNING "Using target ${_lib} as a library")
-  endif()
-
-  get_filename_component(_LIBPATH ${_lib} PATH)
-  if(NOT _LIBPATH STREQUAL _LASTLIBPATH AND NOT _LIBPATH STREQUAL "")
-    set(${populate_libs} "${${populate_libs}} -L\"${_LIBPATH}\"")
-    set(_LASTLIBPATH ${_LIBPATH})
-  endif()
-
-  get_filename_component(_LIBNAME ${_lib} NAME_WLE)
-  if(NOT _LIBNAME STREQUAL "debug" AND NOT _LIBNAME STREQUAL "optimized")
-    if(NOT WIN32)
-      string(REGEX REPLACE "^lib" "" _LIBNAME ${_LIBNAME})
-    endif()
-    set(_LIBNAME "-l${_LIBNAME}")
-    set(${populate_libs} "${${populate_libs}} ${_LIBNAME}")
-  endif()
-endforeach()
-
-configure_file(libSimpleAmqpClient.pc.in
-               ${CMAKE_CURRENT_BINARY_DIR}/libSimpleAmqpClient.pc @ONLY)
-
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libSimpleAmqpClient.pc
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
