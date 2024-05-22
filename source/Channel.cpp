@@ -480,11 +480,14 @@ Channel::ChannelImpl* Channel::OpenSecureChannel(
 #endif
 
   try {
-    int status =
-        amqp_ssl_socket_set_cacert(socket, tls_params.ca_cert_path.c_str());
-    if (status) {
-      throw AmqpLibraryException::CreateException(
-          status, "Error setting CA certificate for socket");
+    int status;
+    if (tls_params.ca_cert_path != "") {
+      status =
+          amqp_ssl_socket_set_cacert(socket, tls_params.ca_cert_path.c_str());
+      if (status) {
+        throw AmqpLibraryException::CreateException(
+            status, "Error setting CA certificate for socket");
+      }
     }
 
     if (tls_params.client_key_path != "" && tls_params.client_cert_path != "") {
@@ -552,7 +555,7 @@ bool Channel::CheckExchangeExists(boost::string_ref exchange_name) {
     amqp_frame_t frame =
         m_impl->DoRpc(AMQP_EXCHANGE_DECLARE_METHOD, &declare, DECLARE_OK);
     m_impl->MaybeReleaseBuffersOnChannel(frame.channel);
-  } catch (NotFoundException e) {
+  } catch (const NotFoundException& e) {
     return false;
   }
   return true;
@@ -676,7 +679,7 @@ bool Channel::CheckQueueExists(boost::string_ref queue_name) {
     amqp_frame_t frame =
         m_impl->DoRpc(AMQP_QUEUE_DECLARE_METHOD, &declare, DECLARE_OK);
     m_impl->MaybeReleaseBuffersOnChannel(frame.channel);
-  } catch (NotFoundException e) {
+  } catch (const NotFoundException& e) {
     return false;
   }
   return true;
