@@ -4,7 +4,7 @@ include(cmake/prelude.cmake)
 
 project(
   SimpleAmqpClient
-  VERSION 2.5.2
+  VERSION 2.5.1
   DESCRIPTION "Short description"
   HOMEPAGE_URL "https://github.com/twig-energy/SimpleAmqpClient"
   LANGUAGES CXX)
