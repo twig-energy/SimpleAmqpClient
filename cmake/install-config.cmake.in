@@ -1,8 +1,7 @@
 include(CMakeFindDependencyMacro)
 
 if(NOT "@BUILD_SHARED_LIBS@")
-  find_dependency(fmt)
-  find_dependency(Boost)
+  find_dependency(Boost COMPONENTS algorithm chrono foreach lexical-cast system variant)
   find_dependency(rabbitmq-c)
 endif()
 
