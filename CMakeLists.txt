@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.28)
 
 include(cmake/prelude.cmake)
 
@@ -13,10 +13,7 @@ include(cmake/project-is-top-level.cmake)
 include(cmake/variables.cmake)
 
 find_package(rabbitmq-c CONFIG REQUIRED)
-find_package(Boost REQUIRED chrono system)
-find_path(BOOST_VARIANT_INCLUDE_DIRS "boost/variant.hpp")
-find_path(BOOST_ALGORITHM_INCLUDE_DIRS "boost/algorithm")
-find_path(BOOST_FOREACH_INCLUDE_DIRS "boost/foreach.hpp")
+find_package(Boost REQUIRED COMPONENTS algorithm chrono foreach lexical_cast system variant)
 
 # ---- Declare library ----
 
@@ -64,12 +61,6 @@ target_include_directories(
   SimpleAmqpClient_SimpleAmqpClient ${warning_guard}
   PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
 
-target_include_directories(
-  SimpleAmqpClient_SimpleAmqpClient SYSTEM
-  PUBLIC "$<BUILD_INTERFACE:${BOOST_VARIANT_INCLUDE_DIRS}>"
-         "$<BUILD_INTERFACE:${BOOST_ALGORITHM_INCLUDE_DIRS}>"
-         "$<BUILD_INTERFACE:${BOOST_FOREACH_INCLUDE_DIRS}>")
-
 target_compile_definitions(SimpleAmqpClient_SimpleAmqpClient
                            PUBLIC SAC_SSL_SUPPORT_ENABLED)
 
@@ -77,7 +68,7 @@ target_compile_features(SimpleAmqpClient_SimpleAmqpClient PUBLIC cxx_std_17)
 
 target_link_libraries(
   SimpleAmqpClient_SimpleAmqpClient
-  PUBLIC rabbitmq::rabbitmq-static Boost::boost Boost::chrono Boost::system)
+  PUBLIC rabbitmq::rabbitmq-static Boost::algorithm Boost::boost Boost::chrono Boost::foreach Boost::lexical_cast Boost::system Boost::variant)
 
 # ---- Install rules ----
 

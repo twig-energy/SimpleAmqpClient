@@ -35,6 +35,7 @@
 #include <boost/optional/optional.hpp>
 #include <cstring>
 #include <string>
+#include <utility>
 
 #include "SimpleAmqpClient/TableImpl.h"
 
@@ -60,8 +61,8 @@ struct BasicMessage::Impl {
 
 BasicMessage::BasicMessage() : m_impl(new Impl) {}
 
-BasicMessage::BasicMessage(const std::string& body) : m_impl(new Impl) {
-  Body(body);
+BasicMessage::BasicMessage(std::string body) : m_impl(new Impl) {
+  Body(std::move(body));
 }
 
 BasicMessage::~BasicMessage() {}
@@ -70,7 +71,7 @@ const std::string& BasicMessage::Body() const { return m_impl->body; }
 
 std::string& BasicMessage::Body() { return m_impl->body; }
 
-void BasicMessage::Body(const std::string& body) { m_impl->body = body; }
+void BasicMessage::Body(std::string body) { m_impl->body = std::move(body); }
 
 const std::string& BasicMessage::ContentType() const {
   if (ContentTypeIsSet()) {
@@ -80,8 +81,8 @@ const std::string& BasicMessage::ContentType() const {
   return empty;
 }
 
-void BasicMessage::ContentType(const std::string& content_type) {
-  m_impl->content_type = content_type;
+void BasicMessage::ContentType(std::string content_type) {
+  m_impl->content_type = std::move(content_type);
 }
 
 bool BasicMessage::ContentTypeIsSet() const {
@@ -98,8 +99,8 @@ const std::string& BasicMessage::ContentEncoding() const {
   return empty;
 }
 
-void BasicMessage::ContentEncoding(const std::string& content_encoding) {
-  m_impl->content_encoding = content_encoding;
+void BasicMessage::ContentEncoding(std::string content_encoding) {
+  m_impl->content_encoding = std::move(content_encoding);
 }
 
 bool BasicMessage::ContentEncodingIsSet() const {
@@ -144,8 +145,8 @@ const std::string& BasicMessage::CorrelationId() const {
   return empty;
 }
 
-void BasicMessage::CorrelationId(const std::string& correlation_id) {
-  m_impl->correlation_id = correlation_id;
+void BasicMessage::CorrelationId(std::string correlation_id) {
+  m_impl->correlation_id = std::move(correlation_id);
 }
 
 bool BasicMessage::CorrelationIdIsSet() const {
@@ -162,8 +163,8 @@ const std::string& BasicMessage::ReplyTo() const {
   return empty;
 }
 
-void BasicMessage::ReplyTo(const std::string& reply_to) {
-  m_impl->reply_to = reply_to;
+void BasicMessage::ReplyTo(std::string reply_to) {
+  m_impl->reply_to = std::move(reply_to);
 }
 
 bool BasicMessage::ReplyToIsSet() const {
@@ -180,8 +181,8 @@ const std::string& BasicMessage::Expiration() const {
   return empty;
 }
 
-void BasicMessage::Expiration(const std::string& expiration) {
-  m_impl->expiration = expiration;
+void BasicMessage::Expiration(std::string expiration) {
+  m_impl->expiration = std::move(expiration);
 }
 
 bool BasicMessage::ExpirationIsSet() const {
@@ -198,8 +199,8 @@ const std::string& BasicMessage::MessageId() const {
   return empty;
 }
 
-void BasicMessage::MessageId(const std::string& message_id) {
-  m_impl->message_id = message_id;
+void BasicMessage::MessageId(std::string message_id) {
+  m_impl->message_id = std::move(message_id);
 }
 
 bool BasicMessage::MessageIdIsSet() const {
@@ -229,7 +230,7 @@ const std::string& BasicMessage::Type() const {
   return empty;
 }
 
-void BasicMessage::Type(const std::string& type) { m_impl->type = type; }
+void BasicMessage::Type(std::string type) { m_impl->type = std::move(type); }
 
 bool BasicMessage::TypeIsSet() const { return m_impl->type.is_initialized(); }
 
@@ -243,8 +244,8 @@ const std::string& BasicMessage::UserId() const {
   return empty;
 }
 
-void BasicMessage::UserId(const std::string& user_id) {
-  m_impl->user_id = user_id;
+void BasicMessage::UserId(std::string user_id) {
+  m_impl->user_id = std::move(user_id);
 }
 
 bool BasicMessage::UserIdIsSet() const {
@@ -261,7 +262,7 @@ const std::string& BasicMessage::AppId() const {
   return empty;
 }
 
-void BasicMessage::AppId(const std::string& app_id) { m_impl->app_id = app_id; }
+void BasicMessage::AppId(std::string app_id) { m_impl->app_id = std::move(app_id); }
 
 bool BasicMessage::AppIdIsSet() const {
   return m_impl->app_id.is_initialized();
@@ -277,8 +278,8 @@ const std::string& BasicMessage::ClusterId() const {
   return empty;
 }
 
-void BasicMessage::ClusterId(const std::string& cluster_id) {
-  m_impl->cluster_id = cluster_id;
+void BasicMessage::ClusterId(std::string cluster_id) {
+  m_impl->cluster_id = std::move(cluster_id);
 }
 
 bool BasicMessage::ClusterIdIsSet() const {
