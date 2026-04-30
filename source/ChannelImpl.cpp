@@ -556,7 +556,7 @@ uint32_t Channel::ChannelImpl::ComputeBrokerVersion(
       static_cast<char *>(version_entry->value.value.bytes.bytes),
       version_entry->value.value.bytes.len);
   auto version_components = std::vector<std::string_view>{};
-  for (auto part :  std::ranges::views::split(std::string_view{version_string}, ".")) {
+  for (auto part : std::ranges::views::split(std::string_view{version_string}, '.')) {
     version_components.emplace_back(part);
   }
   
