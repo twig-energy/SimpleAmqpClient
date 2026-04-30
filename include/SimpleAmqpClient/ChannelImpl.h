@@ -217,7 +217,7 @@ class Channel::ChannelImpl : NonCopyable {
     CheckForError(amqp_send_method(m_connection, channel, method_id, decoded));
 
     amqp_frame_t response;
-    std::array<amqp_channel_t, 1> channels = {{channel}};
+    std::array<amqp_channel_t, 1> channels = {channel};
 
     GetMethodOnChannel(channels, response, expected_responses);
     return response;
@@ -260,8 +260,7 @@ class Channel::ChannelImpl : NonCopyable {
   template <class ChannelListType>
   bool ConsumeMessageOnChannelInner(const ChannelListType channels,
                                     Envelope::ptr_t &message, int timeout) {
-    std::array<uint32_t, 2> DELIVER_OR_CANCEL = {
-        {AMQP_BASIC_DELIVER_METHOD, AMQP_BASIC_CANCEL_METHOD}};
+    constexpr std::array<uint32_t, 2> DELIVER_OR_CANCEL = {AMQP_BASIC_DELIVER_METHOD, AMQP_BASIC_CANCEL_METHOD};
 
     std::chrono::microseconds real_timeout =
         (timeout >= 0 ? std::chrono::milliseconds(timeout)

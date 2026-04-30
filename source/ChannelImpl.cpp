@@ -37,11 +37,11 @@
 #include <sys/types.h>
 #endif
 
+#include <algorithm>
 #include <array>
 #include <cassert>
 #include <charconv>
 #include <cstdint>
-#include <functional>
 #include <ranges>
 #include <system_error>
 #include <typeinfo>
@@ -182,17 +182,15 @@ amqp_channel_t Channel::ChannelImpl::GetNextChannelId() {
 amqp_channel_t Channel::ChannelImpl::CreateNewChannel() {
   amqp_channel_t new_channel = GetNextChannelId();
 
-  static const std::array<uint32_t, 1> OPEN_OK = {
-      {AMQP_CHANNEL_OPEN_OK_METHOD}};
+  static constexpr std::array<uint32_t, 1> OPEN_OK = {AMQP_CHANNEL_OPEN_OK_METHOD};
   amqp_channel_open_t channel_open = {};
-  DoRpcOnChannel<std::array<uint32_t, 1> >(
+  DoRpcOnChannel(
       new_channel, AMQP_CHANNEL_OPEN_METHOD, &channel_open, OPEN_OK);
 
   if(this->is_publisher_confirms) {
-    static const std::array<uint32_t, 1> CONFIRM_OK = {
-        {AMQP_CONFIRM_SELECT_OK_METHOD}};
+    static constexpr std::array<uint32_t, 1> CONFIRM_OK = {AMQP_CONFIRM_SELECT_OK_METHOD};
     amqp_confirm_select_t confirm_select = {};
-    DoRpcOnChannel<std::array<uint32_t, 1> >(
+    DoRpcOnChannel(
         new_channel, AMQP_CONFIRM_SELECT_METHOD, &confirm_select, CONFIRM_OK);
   }
 
@@ -401,9 +399,8 @@ std::vector<amqp_channel_t> Channel::ChannelImpl::GetAllConsumerChannels()
 bool Channel::ChannelImpl::CheckForQueuedMessageOnChannel(
     amqp_channel_t channel) const {
   frame_queue_t::const_iterator it =
-      std::find_if(m_frame_queue.begin(), m_frame_queue.end(),
-                   std::bind(&Channel::ChannelImpl::is_method_on_channel, std::placeholders::_1,
-                               AMQP_BASIC_DELIVER_METHOD, channel));
+      std::ranges::find_if(m_frame_queue,
+                   [channel](const auto& frame) -> bool { return is_method_on_channel(frame, AMQP_BASIC_DELIVER_METHOD, channel); });
 
   if (it == m_frame_queue.end()) {
     return false;
@@ -411,7 +408,7 @@ bool Channel::ChannelImpl::CheckForQueuedMessageOnChannel(
 
   it = std::find_if(
       it + 1, m_frame_queue.end(),
-      std::bind(&Channel::ChannelImpl::is_on_channel, std::placeholders::_1, channel));
+      [channel](const auto& frame) -> bool { return is_on_channel(frame, channel); });
 
   if (it == m_frame_queue.end()) {
     return false;
@@ -426,7 +423,7 @@ bool Channel::ChannelImpl::CheckForQueuedMessageOnChannel(
   while (body_received < body_length) {
     it = std::find_if(
         it + 1, m_frame_queue.end(),
-        std::bind(&Channel::ChannelImpl::is_on_channel, std::placeholders::_1, channel));
+        [channel](const auto& frame) -> bool { return is_on_channel(frame, channel); });
 
     if (it == m_frame_queue.end()) {
       return false;
@@ -444,7 +441,7 @@ void Channel::ChannelImpl::AddToFrameQueue(const amqp_frame_t &frame) {
   m_frame_queue.push_back(frame);
 
   if (CheckForQueuedMessageOnChannel(frame.channel)) {
-    std::array<amqp_channel_t, 1> channel = {{frame.channel}};
+    std::array<amqp_channel_t, 1> channel = {frame.channel};
     Envelope::ptr_t envelope;
     if (!ConsumeMessageOnChannelInner(channel, envelope, -1)) {
       throw std::logic_error(
@@ -491,9 +488,9 @@ bool Channel::ChannelImpl::GetNextFrameFromBroker(
 bool Channel::ChannelImpl::GetNextFrameOnChannel(
     amqp_channel_t channel, amqp_frame_t &frame,
     std::chrono::microseconds timeout) {
-  frame_queue_t::iterator it = std::find_if(
-      m_frame_queue.begin(), m_frame_queue.end(),
-      std::bind(&Channel::ChannelImpl::is_on_channel, std::placeholders::_1, channel));
+  frame_queue_t::iterator it = std::ranges::find_if(
+      m_frame_queue,
+      [channel](const auto& f) -> bool { return is_on_channel(f, channel); });
 
   if (m_frame_queue.end() != it) {
     frame = *it;
@@ -508,16 +505,16 @@ bool Channel::ChannelImpl::GetNextFrameOnChannel(
     return true;
   }
 
-  std::array<amqp_channel_t, 1> channels = {{channel}};
+  std::array<amqp_channel_t, 1> channels = {channel};
   return GetNextFrameFromBrokerOnChannel(channels, frame, timeout);
 }
 
 void Channel::ChannelImpl::MaybeReleaseBuffersOnChannel(
     amqp_channel_t channel) {
   if (m_frame_queue.end() ==
-      std::find_if(
-          m_frame_queue.begin(), m_frame_queue.end(),
-          std::bind(&Channel::ChannelImpl::is_on_channel, std::placeholders::_1, channel))) {
+      std::ranges::find_if(
+          m_frame_queue,
+          [channel](const auto& frame) -> bool { return Channel::ChannelImpl::is_on_channel(frame, channel); })) {
     amqp_maybe_release_buffers_on_channel(m_connection, channel);
   }
 }
