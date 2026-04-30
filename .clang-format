@@ -69,7 +69,6 @@ FixNamespaceComments: true
 ForEachMacros:
   - foreach
   - Q_FOREACH
-  - BOOST_FOREACH
 IncludeBlocks: Regroup
 IncludeCategories:
   # Standard library headers come before anything else
@@ -174,5 +173,4 @@ UseTab: Never
 WhitespaceSensitiveMacros:
   - STRINGIZE
   - PP_STRINGIZE
-  - BOOST_PP_STRINGIZE
 ...

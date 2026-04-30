@@ -13,7 +13,6 @@ include(cmake/project-is-top-level.cmake)
 include(cmake/variables.cmake)
 
 find_package(rabbitmq-c CONFIG REQUIRED)
-find_package(Boost REQUIRED COMPONENTS algorithm chrono foreach lexical_cast system variant)
 
 # ---- Declare library ----
 
@@ -46,7 +45,6 @@ if(NOT BUILD_SHARED_LIBS)
   target_compile_definitions(SimpleAmqpClient_SimpleAmqpClient
                              PUBLIC SIMPLEAMQPCLIENT_STATIC_DEFINE)
 endif()
-set(Boost_USE_STATIC_RUNTIME OFF)
 
 set_target_properties(
   SimpleAmqpClient_SimpleAmqpClient
@@ -64,11 +62,11 @@ target_include_directories(
 target_compile_definitions(SimpleAmqpClient_SimpleAmqpClient
                            PUBLIC SAC_SSL_SUPPORT_ENABLED)
 
-target_compile_features(SimpleAmqpClient_SimpleAmqpClient PUBLIC cxx_std_17)
+target_compile_features(SimpleAmqpClient_SimpleAmqpClient PUBLIC cxx_std_23)
 
 target_link_libraries(
   SimpleAmqpClient_SimpleAmqpClient
-  PUBLIC rabbitmq::rabbitmq-static Boost::algorithm Boost::boost Boost::chrono Boost::foreach Boost::lexical_cast Boost::system Boost::variant)
+  PUBLIC rabbitmq::rabbitmq-static)
 
 # ---- Install rules ----
 

@@ -30,7 +30,7 @@ target_link_libraries(
     SimpleAmqpClient::SimpleAmqpClient
     GTest::gtest_main
 )
-target_compile_features(SimpleAmqpClient_test PRIVATE cxx_std_17)
+target_compile_features(SimpleAmqpClient_test PRIVATE cxx_std_23)
 
 add_test(NAME simple_amqp_client_test COMMAND SimpleAmqpClient_test "--gtest_color=yes" "--gtest_output=xml:")
 add_folders(Test)

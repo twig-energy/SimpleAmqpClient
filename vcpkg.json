@@ -2,13 +2,7 @@
   "name": "simpleamqpclient",
   "version-semver": "2.5.1",
   "dependencies": [
-    "librabbitmq",
-    "boost-chrono",
-    "boost-system",
-    "boost-variant",
-    "boost-lexical-cast",
-    "boost-algorithm",
-    "boost-foreach"
+    "librabbitmq"
   ],
   "default-features": [],
   "features": {
