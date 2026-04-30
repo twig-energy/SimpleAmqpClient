@@ -28,14 +28,12 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#include <boost/cstdint.hpp>
-#include <boost/make_shared.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/utility.hpp>
-#include <string>
+#include <cstdint>
+#include <memory>
 #include <utility>
+#include <string>
 
+#include "SimpleAmqpClient/NonCopyable.h"
 #include "SimpleAmqpClient/Table.h"
 #include "SimpleAmqpClient/Util.h"
 
@@ -52,10 +50,10 @@ namespace AmqpClient {
 /**
  * An AMQP BasicMessage
  */
-class SIMPLEAMQPCLIENT_EXPORT BasicMessage : boost::noncopyable {
+class SIMPLEAMQPCLIENT_EXPORT BasicMessage : NonCopyable {
  public:
   /// A shared pointer to BasicMessage
-  typedef boost::shared_ptr<BasicMessage> ptr_t;
+  typedef std::shared_ptr<BasicMessage> ptr_t;
 
   /// With durable queues, messages can be requested to persist or not
   enum delivery_mode_t {
@@ -67,7 +65,7 @@ class SIMPLEAMQPCLIENT_EXPORT BasicMessage : boost::noncopyable {
   /**
    * Create a new empty BasicMessage object
    */
-  static ptr_t Create() { return boost::make_shared<BasicMessage>(); }
+  static ptr_t Create() { return std::make_shared<BasicMessage>(); }
 
   /**
    * Create a new BasicMessage object with given body
@@ -76,7 +74,7 @@ class SIMPLEAMQPCLIENT_EXPORT BasicMessage : boost::noncopyable {
    * @returns a new BasicMessage object
    */
   static ptr_t Create(std::string body) {
-    return boost::make_shared<BasicMessage>(std::move(body));
+    return std::make_shared<BasicMessage>(std::move(body));
   }
 
   /// Construct empty BasicMessage
@@ -155,11 +153,11 @@ class SIMPLEAMQPCLIENT_EXPORT BasicMessage : boost::noncopyable {
   /**
    * Gets the priority property
    */
-  boost::uint8_t Priority() const;
+  uint8_t Priority() const;
   /**
    * Sets the priority property
    */
-  void Priority(boost::uint8_t priority);
+  void Priority(uint8_t priority);
   /**
    * Determines whether the priority property is set
    */
@@ -240,11 +238,11 @@ class SIMPLEAMQPCLIENT_EXPORT BasicMessage : boost::noncopyable {
   /**
    * Gets the timestamp property
    */
-  boost::uint64_t Timestamp() const;
+  uint64_t Timestamp() const;
   /**
    * Sets the timestamp property
    */
-  void Timestamp(boost::uint64_t timestamp);
+  void Timestamp(uint64_t timestamp);
   /**
    * Determines whether the timestamp property is set
    */
@@ -343,7 +341,7 @@ class SIMPLEAMQPCLIENT_EXPORT BasicMessage : boost::noncopyable {
  protected:
   struct Impl;
   /// PIMPL idiom
-  boost::scoped_ptr<Impl> m_impl;
+  std::unique_ptr<Impl> m_impl;
 };
 
 }  // namespace AmqpClient

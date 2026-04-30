@@ -48,7 +48,7 @@
       "hidden": true,
       "cacheVariables": {
         "CMAKE_CXX_EXTENSIONS": "OFF",
-        "CMAKE_CXX_STANDARD": "17",
+        "CMAKE_CXX_STANDARD": "23",
         "CMAKE_CXX_STANDARD_REQUIRED": "ON"
       }
     },
@@ -68,7 +68,7 @@
     },
     {
       "name": "ci-unix",
-      "generator": "Unix Makefiles",
+      "generator": "Ninja",
       "hidden": true,
       "inherits": [
         "flags-unix",
@@ -146,9 +146,7 @@
       "inherits": [
         "ci-build",
         "ci-unix",
-        "clang-tidy",
         "vcpkg",
-        "cppcheck",
         "dev-mode"
       ]
     },
